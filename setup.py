@@ -4,7 +4,7 @@
 import codecs
 import os
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
 def read(fname):
@@ -52,7 +52,7 @@ setup(
         'Operating System :: OS Independent',
         'License :: OSI Approved :: MIT License',
     ],
-    packages=["airflow_gpg_plugin"],
+    packages=find_packages(exclude=['contrib', 'docs', 'tests']),  # Required,
     entry_points={
         'airflow.plugins': [
             'airflow_gpg_plugin = airflow_gpg_plugin.plugin:AirflowGPGPlugin'
