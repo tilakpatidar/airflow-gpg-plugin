@@ -1,6 +1,6 @@
 # Airflow GPG Plugin
-[![Latest Version](https://img.shields.io/pypi/v/airflow-gpg-plugin.svg)](https://pypi.python.org/pypi/pytest-snowflake-bdd/)
-[![Python Versions](https://img.shields.io/pypi/pyversions/airflow-gpg-plugin.svg)](https://pypi.python.org/pypi/pytest-snowflake-bdd/)
+[![Latest Version](https://img.shields.io/pypi/v/airflow-gpg-plugin.svg)](https://pypi.org/project/airflow-gpg-plugin/)
+[![Python Versions](https://img.shields.io/pypi/pyversions/airflow-gpg-plugin.svg)](https://pypi.org/project/airflow-gpg-plugin/)
 
 Airflow plugin with hooks and operators to work with GPG encryption and decryption.
 

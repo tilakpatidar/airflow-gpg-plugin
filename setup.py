@@ -15,7 +15,7 @@ def read(fname):
 gh_run_number = os.environ.get("BUILD_NUMBER", None)
 build_number = None if gh_run_number is None or gh_run_number == "" else gh_run_number
 
-version = '0.1.0'
+version = '0.1.1'
 
 with open('requirements.txt') as f:
     REQUIRES = f.readlines()
