@@ -7,6 +7,8 @@ import pytest
 from airflow import settings
 from airflow.models import Connection
 
+from airflow_gpg_plugin.hooks.gpg_hook import GpgHook
+
 
 @pytest.fixture(scope="session", autouse=True)
 def airflow_home():
@@ -26,6 +28,24 @@ def gpg_key_with_passphrase(tmpdir_factory):
         password="gpgexamplepassphrase",
         key_file=key_file_path
     )
+
+
+@pytest.fixture(scope="session", autouse=True)
+def gpg_key_with_passphrase_connection(gpg_key_with_passphrase, tmpdir_factory):
+    gpg_conn_id = "default_gpg_conn_enc_op"
+
+    conn = Connection(
+        conn_id=gpg_conn_id,
+        conn_type=GpgHook.conn_type,
+        login=gpg_key_with_passphrase["login"],
+        password=gpg_key_with_passphrase["password"],
+        extra={
+            "key_file": gpg_key_with_passphrase["key_file"]
+        }
+    )
+
+    create_connection(gpg_conn_id, conn)
+    yield gpg_conn_id
 
 
 @pytest.fixture(scope="session", autouse=True)

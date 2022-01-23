@@ -12,6 +12,7 @@ class GPGEncryptFileOperator(BaseOperator):
     :param input_file_path: File to encrypt with GPG key
     :param output_file_path: Output path of encrypted file
     """
+    template_fields = ('input_file_path', 'output_file_path')
 
     def __init__(self,
                  conn_id: str,

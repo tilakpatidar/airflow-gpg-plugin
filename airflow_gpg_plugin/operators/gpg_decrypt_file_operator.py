@@ -13,6 +13,8 @@ class GPGDecryptFileOperator(BaseOperator):
     :param output_file_path: Output path of decrypted file
     """
 
+    template_fields = ('input_file_path', 'output_file_path')
+
     def __init__(self,
                  conn_id: str,
                  input_file_path: str,
