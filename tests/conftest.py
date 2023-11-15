@@ -18,11 +18,10 @@ def airflow_home():
 
 @pytest.fixture(scope="session", autouse=True)
 def gpg_key_with_passphrase(tmpdir_factory):
-    key_file_path = str(tmpdir_factory.mktemp("keys").join("gpg_key_with_passphrase.asc"))
-    key_file = open(key_file_path, "w")
-    key_file.write(open("./tests/resources/gpgexamplepassphrase.asc", "r").read())
-    key_file.flush()
-    key_file.close()
+    key_file_path = copy_gpg_key_file(
+        "./tests/resources/gpgexamplepassphrase.asc",
+        tmpdir_factory,
+        "gpg_key_with_passphrase.asc")
     yield dict(
         login="gpgexamplepassphrase@example.com",
         password="gpgexamplepassphrase",
@@ -31,7 +30,7 @@ def gpg_key_with_passphrase(tmpdir_factory):
 
 
 @pytest.fixture(scope="session", autouse=True)
-def gpg_key_with_passphrase_connection(gpg_key_with_passphrase, tmpdir_factory):
+def gpg_key_with_passphrase_connection(gpg_key_with_passphrase, tmpdir_factory) -> str:
     gpg_conn_id = "default_gpg_conn_enc_op"
 
     conn = Connection(
@@ -44,17 +43,16 @@ def gpg_key_with_passphrase_connection(gpg_key_with_passphrase, tmpdir_factory):
         }
     )
 
-    create_connection(gpg_conn_id, conn)
+    register_connection(conn)
     yield gpg_conn_id
 
 
 @pytest.fixture(scope="session", autouse=True)
 def gpg_key_without_passphrase(tmpdir_factory):
-    key_file_path = str(tmpdir_factory.mktemp("keys").join("gpg_key.asc"))
-    key_file = open(key_file_path, "w")
-    key_file.write(open("./tests/resources/gpgexample.asc", "r").read())
-    key_file.flush()
-    key_file.close()
+    key_file_path = copy_gpg_key_file(
+        "./tests/resources/gpgexample.asc",
+        tmpdir_factory,
+        "gpg_key.asc")
     yield dict(
         login="gpgexample@example.com",
         password=None,
@@ -62,21 +60,40 @@ def gpg_key_without_passphrase(tmpdir_factory):
     )
 
 
-def create_connection(conn_id: str, connection: Connection):
+@pytest.fixture(scope="session", autouse=True)
+def gpg_key_with_private_key(tmpdir_factory):
+    private_key = open("./tests/resources/gpgexamplepassphrase.asc", "r").read()
+    yield dict(
+        login="gpgexample@example.com",
+        password="gpgexamplepassphrase",
+        private_key=private_key  # re.sub("\n", "\\\\n", private_key)
+    )
+
+
+def copy_gpg_key_file(in_key_file: str, tmpdir_factory, out_key_file: str) -> str:
+    key_file_path = str(tmpdir_factory.mktemp("keys").join(out_key_file))
+    key_file = open(key_file_path, "w")
+    key_file.write(open(in_key_file, "r").read())
+    key_file.flush()
+    key_file.close()
+    return key_file_path
+
+
+def register_connection(connection: Connection):
     session = settings.Session
-    print(f"Creating connection {conn_id}")
+    print(f"Creating connection {connection.conn_id}")
     connection_objs = session.query(Connection).filter(
-        Connection.conn_id == conn_id).all()
+        Connection.conn_id == connection.conn_id).all()
     for connection_obj in connection_objs:
         if connection_obj is not None:
             # delete all existing connections
-            msg = f'\n\tA connection with `conn_id`={conn_id} already exists. Overwriting\n'
+            msg = f'\n\tA connection with `conn_id`={connection.conn_id} already exists. Overwriting\n'
             print(msg)
             session.delete(connection_obj)
             session.commit()
     session.add(connection)
     session.commit()
-    return conn_id
+    return connection.conn_id
 
 
 def decrypt_file(encrypted_file_path, key_details):
